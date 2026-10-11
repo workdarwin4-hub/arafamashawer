@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق عرفة مشاوير - العميل</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #f4f4f9; margin: 0; padding: 20px; text-align: right; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #d9534f; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #5cb85c; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #4cae4c; }
+        .alert { padding: 10px; margin-top: 10px; border-radius: 4px; text-align: center; display: none; }
+        .success { background: #dff0d8; color: #3c763d; display: block; }
+        .danger { background: #f2dede; color: #a94442; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>عرفة مشاوير - شبرا الخيمة</h1>
+    <form id="orderForm">
+        <div class="form-group">
+            <label>اسم العميل:</label>
+            <input type="text" id="clientName" required placeholder="اكتب اسمك">
+        </div>
+        <div class="form-group">
+            <label>رقم الهاتف:</label>
+            <input type="tel" id="clientPhone" required placeholder="01xxxxxxxx0">
+        </div>
+        <div class="form-group">
+            <label>العنوان والمنطقة (الزون في شبرا الخيمة):</label>
+            <input type="text" id="clientAddress" required placeholder="مثال: شارع عشرة، شبرا الخيمة">
+        </div>
+        <div class="form-group">
+            <label>المنتجات المطلوبة (بقالة، خضار، سجائر...):</label>
+            <textarea id="orderDetails" rows="4" required placeholder="اكتب الأطلبية بالتفصيل..."></textarea>
+        </div>
+        <button type="submit" id="submitBtn">إرسال الطلب الآن</button>
+    </form>
+    <div id="statusAlert" class="alert"></div>
+</div>
+
+<script type="module">
+    import { db } from './js/firebase-config.js';
+    import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const form = document.getElementById('orderForm');
+    const alertDiv = document.getElementById('statusAlert');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('clientName').value;
+        const phone = document.getElementById('clientPhone').value;
+        const address = document.getElementById('clientAddress').value;
+        const details = document.getElementById('orderDetails').value;
+
+        try {
+            await addDoc(collection(db, "orders"), {
+                clientName: name,
+                clientPhone: phone,
+                clientAddress: address,
+                orderDetails: details,
+                status: "جديد",
+                createdAt: new Date()
+            });
+
+            alertDiv.className = "alert success";
+            alertDiv.innerText = "تم إرسال طلبك بنجاح وسيتواصل معك المندوب قريباً!";
+            form.reset();
+        } catch (error) {
+            alertDiv.className = "alert danger";
+            alertDiv.innerText = "حدث خطأ أثناء إرسال الطلب، تأكد من الاتصال بالإنترنت.";
+            console.error("Error adding document: ", error);
+        }
+    });
+</script>
+
+</body>
+</html>

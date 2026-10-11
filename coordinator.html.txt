@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الكوردنيتور - عرفة مشاوير</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #fdfdfe; margin: 0; padding: 20px; text-align: right; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #f0ad4e; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background: #f7f7f7; }
+        .btn-action { background: #0275d8; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-action:hover { background: #025aa5; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>لوحة تحكم الكوردنيتور - شبرا الخيمة</h1>
+    <hr>
+    <h3>متابعة وتوزيع الطلبات الواردة:</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>اسم العميل</th>
+                <th>رقم الهاتف</th>
+                <th>العنوان (الزون)</th>
+                <th>الطلب</th>
+                <th>الحالة</th>
+                <th>إجراء</th>
+            </tr>
+        </thead>
+        <tbody id="coordinatorOrders">
+            <tr><td colspan="6">جاري التحميل...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script type="module">
+    import { db } from './js/firebase-config.js';
+    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    async function loadCoordinatorData() {
+        const tbody = document.getElementById('coordinatorOrders');
+        tbody.innerHTML = "";
+
+        try {
+            const querySnapshot = await getDocs(collection(db, "orders"));
+            if (querySnapshot.empty) {
+                tbody.innerHTML = "<tr><td colspan='6'>لا توجد طلبات جديدة حالياً.</td></tr>";
+                return;
+            }
+
+            querySnapshot.forEach((doc) => {
+                const order = doc.data();
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${order.clientName}</td>
+                    <td>${order.clientPhone}</td>
+                    <td>${order.clientAddress}</td>
+                    <td>${order.orderDetails}</td>
+                    <td>${order.status}</td>
+                    <td><button class="btn-action">توجيه لمندوب</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            tbody.innerHTML = "<tr><td colspan='6' style='color:red;'>خطأ في تحميل البيانات.</td></tr>";
+            console.error(error);
+        }
+    }
+
+    loadCoordinatorData();
+</script>
+
+</body>
+</html>

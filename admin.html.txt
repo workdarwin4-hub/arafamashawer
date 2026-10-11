@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الأدمن الرئيسي - عرفة مشاوير</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #292b2c; color: #fff; margin: 0; padding: 20px; text-align: right; }
+        .container { max-width: 600px; margin: 50px auto; background: #373a3c; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        h1 { color: #d9534f; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; border: 1px solid #555; background: #292b2c; color: #fff; border-radius: 4px; box-sizing: border-box; }
+        button { background: #d9534f; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #c9302c; }
+        .admin-dashboard { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="loginBox">
+    <h1>تسجيل دخول الأدمن الرئيسي</h1>
+    <div class="form-group">
+        <label>أدخل كود الأدمن السري (الافتراضي: 94531):</label>
+        <input type="password" id="masterCode" placeholder="أدخل الكود هنا">
+    </div>
+    <button id="loginBtn">دخول للوحة التحكم</button>
+</div>
+
+<div class="container admin-dashboard" id="dashBox">
+    <h1>لوحة تحكم الأدمن (صحـب الشركـة)</h1>
+    <hr>
+    <p>أهلاً بك يا بطل! أنت الآن تتحكم في كل فروع "عرفة مشاوير" (بداية من شبرا الخيمة).</p>
+    <ul>
+        <li>متابعة إجمالي الأرباح وحركة المناديب والكوردنيتورز.</li>
+        <li>التحكم في حظر أو تفعيل بطاقات المناديب.</li>
+        <li>إدارة وتعديل الكود السري الرئيسي.</li>
+    </ul>
+</div>
+
+<script>
+    const loginBtn = document.getElementById('loginBtn');
+    loginBtn.addEventListener('click', () => {
+        const code = document.getElementById('masterCode').value;
+        if(code === "94531") {
+            document.getElementById('loginBox').style.display = "none";
+            document.getElementById('dashBox').style.display = "block";
+        } else {
+            alert("الكود السري غير صحيح! تأكد من الرقم (94531).");
+        }
+    });
+</script>
+
+</body>
+</html>
