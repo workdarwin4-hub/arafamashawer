@@ -4,68 +4,198 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة الأدمن الرئيسي - عرفة مشاوير</title>
+    <!-- مكتبة الخرائط المجانية Leaflet عشان خريطة شبرا الخيمة -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { font-family: Tahoma, sans-serif; background: #292b2c; color: #fff; margin: 0; padding: 20px; text-align: right; }
-        .container { max-width: 700px; margin: 30px auto; background: #373a3c; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        h1 { color: #d9534f; text-align: center; }
-        .form-group { margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; border: 1px solid #555; background: #292b2c; color: #fff; border-radius: 4px; box-sizing: border-box; }
-        button { background: #d9534f; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; }
-        button:hover { background: #c9302c; }
+        body { font-family: Tahoma, sans-serif; background: #1a1a1a; color: #fff; margin: 0; padding: 20px; text-align: right; }
+        .container { max-width: 900px; margin: 20px auto; background: #262626; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h1, h2 { color: #ff4d4d; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #444; background: #1a1a1a; color: #fff; border-radius: 4px; box-sizing: border-box; }
+        button { background: #ff4d4d; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #e03b3b; }
         .admin-dashboard { display: none; }
-        .card { background: #292b2c; padding: 15px; margin-top: 15px; border-radius: 6px; border: 1px solid #444; }
+        .card { background: #1f1f1f; padding: 15px; margin-top: 15px; border-radius: 6px; border: 1px solid #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #444; padding: 10px; text-align: center; }
+        th { background: #333; }
+        #map { height: 350px; width: 100%; border-radius: 6px; margin-top: 15px; }
+        .btn-danger { background: #d9534f; padding: 5px 10px; width: auto; }
+        .btn-success { background: #5cb85c; padding: 5px 10px; width: auto; }
     </style>
 </head>
 <body>
 
+<!-- شاشة تسجيل الدخول -->
 <div class="container" id="loginBox">
     <h1>تسجيل دخول الأدمن الرئيسي</h1>
     <div class="form-group">
         <label>أدخل كود الأدمن السري (الافتراضي: 94531):</label>
         <input type="password" id="masterCode" placeholder="أدخل الكود هنا">
     </div>
-    <button id="loginBtn">دخول للوحة التحكم</button>
+    <button id="loginBtn">دخول لوحة التحكم الشاملة</button>
 </div>
 
+<!-- لوحة التحكم الرئيسية الكاملة -->
 <div class="container admin-dashboard" id="dashBox">
-    <h1>لوحة تحكم الأدمن (صاحب الشركة)</h1>
+    <h1>لوحة تحكم الأدمن الرئيسي (عرفة مشاوير)</h1>
     <hr>
-    <p>أهلاً بك يا بطل! أنت تتحكم في منصة "عرفة مشاوير" بشبرا الخيمة.</p>
     
+    <!-- إحصائيات النظام -->
     <div class="card">
-        <h3>إحصائيات السستم:</h3>
-        <p id="totalOrdersCount">جاري حساب الطلبات...</p>
+        <h3>📊 إحصائيات عامة:</h3>
+        <p id="totalOrdersCount">جاري تحميل إحصائيات الطلبات...</p>
     </div>
 
+    <!-- إدارة المناديب (إضافة وحظر) -->
     <div class="card">
-        <h3>إدارة النظام:</h3>
-        <button onclick="alert('تم تحديث حالة النظام بنجاح!')" style="background: #0275d8; margin-top: 10px;">تحديث بيانات المناديب</button>
+        <h3>🛵 إدارة وفريق المناديب (شبرا الخيمة):</h3>
+        <div class="form-group" style="margin-top:10px;">
+            <input type="text" id="driverNameInput" placeholder="اسم المندوب الجديد">
+        </div>
+        <div class="form-group">
+            <input type="text" id="driverPhoneInput" placeholder="رقم هاتف المندوب">
+        </div>
+        <button id="addDriverBtn" style="background: #5cb85c;">إضافة مندوب جديد للنظام</button>
+        
+        <table style="margin-top: 15px;">
+            <thead>
+                <tr>
+                    <th>اسم المندوب</th>
+                    <th>الهاتف</th>
+                    <th>الحالة</th>
+                    <th>إجراء تحكم</th>
+                </tr>
+            </thead>
+            <tbody id="driversTableBody">
+                <tr><td colspan="4">لا توجد مناديب مضافين حالياً.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- خريطة تتبع المناديب الحية -->
+    <div class="card">
+        <h3>🗺️ الخريطة الحية لتتبع المناديب في شبرا الخيمة:</h3>
+        <p style="font-size: 13px; color: #aaa;">تظهر مواقع المناديب النشطين حالياً في نطاق شبرا الخيمة.</p>
+        <div id="map"></div>
+    </div>
+
+    <!-- إعدادات الأمان والكود السري -->
+    <div class="card">
+        <h3>⚙️ إعدادات النظام:</h3>
+        <div class="form-group">
+            <label>تغيير كود الأدمن السري:</label>
+            <input type="text" id="newMasterCode" placeholder="اكتب الكود الجديد السري">
+        </div>
+        <button id="updateCodeBtn" style="background: #0275d8;">حفظ الكود السري الجديد</button>
     </div>
 </div>
+
+<!-- جلب مكتبة الخرائط Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script type="module">
     import { db } from './js/firebase-config.js';
-    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const loginBtn = document.getElementById('loginBtn');
+    let map = null;
+
     loginBtn.addEventListener('click', async () => {
         const code = document.getElementById('masterCode').value;
         if(code === "94531") {
             document.getElementById('loginBox').style.display = "none";
             document.getElementById('dashBox').style.display = "block";
             
-            // جلب إحصائيات الطلبات من الفايرباس
-            try {
-                const querySnapshot = await getDocs(collection(db, "orders"));
-                document.getElementById('totalOrdersCount').innerText = `إجمالي الطلبات المسجلة في السستم: ${querySnapshot.size} طلب`;
-            } catch(e) {
-                document.getElementById('totalOrdersCount').innerText = "خطأ في جلب عدد الطلبات.";
-            }
-
+            // تحميل البيانات والخريطة
+            loadAdminData();
+            initMap();
         } else {
             alert("الكود السري غير صحيح! تأكد من الرقم (94531).");
         }
     });
+
+    async function loadAdminData() {
+        try {
+            // جلب الأوردرات
+            const ordersSnapshot = await getDocs(collection(db, "orders"));
+            document.getElementById('totalOrdersCount').innerText = `إجمالي الطلبات المسجلة: ${ordersSnapshot.size} طلب`;
+
+            // جلب المناديب
+            loadDrivers();
+        } catch(e) {
+            console.error("Error loading data:", e);
+        }
+    }
+
+    async function loadDrivers() {
+        const tbody = document.getElementById('driversTableBody');
+        tbody.innerHTML = "";
+        try {
+            const driversSnapshot = await getDocs(collection(db, "drivers"));
+            if(driversSnapshot.empty) {
+                tbody.innerHTML = "<tr><td colspan='4'>لا توجد مناديب مسجلين. أضف مندوباً الآن.</td></tr>";
+                return;
+            }
+            driversSnapshot.forEach((dDoc) => {
+                const driver = dDoc.data();
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${driver.name}</td>
+                    <td>${driver.phone}</td>
+                    <td style="color: ${driver.status === 'حظر' ? 'red' : 'lightgreen'};">${driver.status || 'نشط'}</td>
+                    <td>
+                        <button class="btn-danger" onclick="toggleDriverStatus('${dDoc.id}', '${driver.status}')">${driver.status === 'حظر' ? 'إلغاء الحظر' : 'حظر'}</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch(e) {
+            tbody.innerHTML = "<tr><td colspan='4'>خطأ في تحميل المناديب.</td></tr>";
+        }
+    }
+
+    // زر إضافة مندوب جديد
+    document.getElementById('addDriverBtn').addEventListener('click', async () => {
+        const name = document.getElementById('driverNameInput').value;
+        const phone = document.getElementById('driverPhoneInput').value;
+        if(!name || !phone) {
+            alert('الرجاء إدخال اسم ورقم هاتف المندوب!');
+            return;
+        }
+        try {
+            await addDoc(collection(db, "drivers"), {
+                name: name,
+                phone: phone,
+                status: "نشط",
+                lat: 30.1223, // إحداثيات افتراضية في شبرا الخيمة
+                lng: 31.2440
+            });
+            alert('تمت إضافة المندوب بنجاح!');
+            document.getElementById('driverNameInput').value = "";
+            document.getElementById('driverPhoneInput').value = "";
+            loadDrivers();
+        } catch(e) {
+            alert('حدث خطأ أثناء إضافة المندوب.');
+            console.error(e);
+        }
+    });
+
+    // تهيئة الخريطة (مركزها شبرا الخيمة)
+    function initMap() {
+        if(map) return;
+        // إحداثيات شبرا الخيمة تقريباً
+        map = L.map('map').setView([30.1223, 31.2440], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // إضافة علامة افتراضية لمندوب في شبرا الخيمة
+        L.marker([30.1223, 31.2440]).addTo(map)
+            .bindPopup('<b>موقع مركزي: شبرا الخيمة</b><br>نقطة انطلاق المناديب.')
+            .openPopup();
+    }
 </script>
 
 </body>
