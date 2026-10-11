@@ -6,13 +6,14 @@
     <title>لوحة الأدمن الرئيسي - عرفة مشاوير</title>
     <style>
         body { font-family: Tahoma, sans-serif; background: #292b2c; color: #fff; margin: 0; padding: 20px; text-align: right; }
-        .container { max-width: 600px; margin: 50px auto; background: #373a3c; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .container { max-width: 700px; margin: 30px auto; background: #373a3c; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         h1 { color: #d9534f; text-align: center; }
         .form-group { margin-bottom: 20px; }
         input { width: 100%; padding: 12px; border: 1px solid #555; background: #292b2c; color: #fff; border-radius: 4px; box-sizing: border-box; }
         button { background: #d9534f; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; }
         button:hover { background: #c9302c; }
         .admin-dashboard { display: none; }
+        .card { background: #292b2c; padding: 15px; margin-top: 15px; border-radius: 6px; border: 1px solid #444; }
     </style>
 </head>
 <body>
@@ -27,23 +28,40 @@
 </div>
 
 <div class="container admin-dashboard" id="dashBox">
-    <h1>لوحة تحكم الأدمن (صحـب الشركـة)</h1>
+    <h1>لوحة تحكم الأدمن (صاحب الشركة)</h1>
     <hr>
-    <p>أهلاً بك يا بطل! أنت الآن تتحكم في كل فروع "عرفة مشاوير" (بداية من شبرا الخيمة).</p>
-    <ul>
-        <li>متابعة إجمالي الأرباح وحركة المناديب والكوردنيتورز.</li>
-        <li>التحكم في حظر أو تفعيل بطاقات المناديب.</li>
-        <li>إدارة وتعديل الكود السري الرئيسي.</li>
-    </ul>
+    <p>أهلاً بك يا بطل! أنت تتحكم في منصة "عرفة مشاوير" بشبرا الخيمة.</p>
+    
+    <div class="card">
+        <h3>إحصائيات السستم:</h3>
+        <p id="totalOrdersCount">جاري حساب الطلبات...</p>
+    </div>
+
+    <div class="card">
+        <h3>إدارة النظام:</h3>
+        <button onclick="alert('تم تحديث حالة النظام بنجاح!')" style="background: #0275d8; margin-top: 10px;">تحديث بيانات المناديب</button>
+    </div>
 </div>
 
-<script>
+<script type="module">
+    import { db } from './js/firebase-config.js';
+    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
     const loginBtn = document.getElementById('loginBtn');
-    loginBtn.addEventListener('click', () => {
+    loginBtn.addEventListener('click', async () => {
         const code = document.getElementById('masterCode').value;
         if(code === "94531") {
             document.getElementById('loginBox').style.display = "none";
             document.getElementById('dashBox').style.display = "block";
+            
+            // جلب إحصائيات الطلبات من الفايرباس
+            try {
+                const querySnapshot = await getDocs(collection(db, "orders"));
+                document.getElementById('totalOrdersCount').innerText = `إجمالي الطلبات المسجلة في السستم: ${querySnapshot.size} طلب`;
+            } catch(e) {
+                document.getElementById('totalOrdersCount').innerText = "خطأ في جلب عدد الطلبات.";
+            }
+
         } else {
             alert("الكود السري غير صحيح! تأكد من الرقم (94531).");
         }
